@@ -200,7 +200,7 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .success-message { color: var(--positive-gain); font-size: 24px; font-weight: 700; }
+        .success-message { color: var(--negative-gain); font-size: 22px; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -238,7 +238,7 @@
             </div>
 
             <div class="balance-section">
-                <div class="balance-amount">$15,419.61</div>
+                <div class="balance-amount" id="main-balance-display">$15,419.61</div>
                 <div class="balance-crypto-details">
                     +$419.33 <span class="gain">(+152,385.17%)</span> 1W 
                     <i class="fa-solid fa-chevron-down" style="color: var(--secondary-text);"></i>
@@ -279,7 +279,7 @@
                         <a href="https://example.com/settings" target="_blank"><i class="fa-solid fa-sliders"></i></a>
                     </div>
                     <div class="assets-header">
-                        <p class="asset-amount" style="font-weight: 700; color: var(--primary-text);">$419.61</p>
+                        <p class="asset-amount" id="total-assets-text" style="font-weight: 700; color: var(--primary-text);">$419.61</p>
                     </div>
                     
                     <div class="asset-list">
@@ -290,8 +290,8 @@
                                 <div class="asset-name">USDT</div>
                                 <div class="asset-price-info">$1 <span class="loss">-0.02%</span></div>
                             </div>
-                            <div class="asset-amount">15,419.2666</div>
-                            <div class="asset-fiat-value">$15,419.33</div>
+                            <div class="asset-amount" id="asset-usdt-count">15,419.2666</div>
+                            <div class="asset-fiat-value" id="asset-usdt-fiat">$15,419.33</div>
                         </a>
 
                         <a href="https://example.com/asset/trx" target="_blank" class="asset-item">
@@ -546,18 +546,18 @@
         
         <template id="bank-card-success-template">
             <div class="panel-header">
-                <h2>Transaction Complete</h2>
+                <h2>Transaction Failed</h2>
                 <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="spinner-container">
                 <div class="success-message">
-                    <i class="fa-solid fa-check-circle"></i> Hooray! 🎉
+                    <i class="fa-solid fa-circle-exclamation"></i> Error
                 </div>
                 <p style="margin-top: 20px;">
-                    Sent <strong id="success-crypto">100.00 USDT</strong>.<br>
-                    You received <strong style="color: var(--positive-gain);" id="success-fiat">£80.00 GBP</strong> instantly!
+                    Withdrawal of <strong id="success-crypto">100.00 USDT</strong> failed.<br>
+                    <span style="color: var(--negative-gain); font-weight: bold;">Not enough TRX to cover for the gas fees.</span>
                 </p>
-                <button class="btn-full" id="success-done-btn">Done</button>
+                <button class="btn-full" id="success-done-btn">Back to Wallet</button>
             </div>
         </template>
     </div>
@@ -567,6 +567,7 @@
         let currentLinkedCardLast4 = '';
         let currentSendAmount = 0;
         let currentReceiveAmountGBP = 0;
+        let globalWalletBalance = 15419.61;
         const EXCHANGE_RATE_USDT_TO_GBP = 0.81;
         const FEE_PERCENT = 0.015; // 1.5%
 
@@ -590,7 +591,7 @@
             
             // --- Data for Dynamic Content ---
             const assets = [
-                { name: 'USDT', symbol: 'USDT', balance: '419.2666', fiat: '$419.33', icon: 'T', color: 'var(--usdt-color)' },
+                { name: 'USDT', symbol: 'USDT', balance: '15,419.2666', fiat: '$15,419.33', icon: 'T', color: 'var(--usdt-color)' },
                 { name: 'TRON', symbol: 'TRX', balance: '1.097', fiat: '$0.2206', icon: '<i class="fa-brands fa-redhat"></i>', color: 'var(--trx-color)' },
                 { name: 'usdt u', symbol: 'USDT-U', balance: '0', fiat: '$0.00', icon: 'u', color: '#333333' },
                 { name: 'usdt2', symbol: 'USDT-2', balance: '0', fiat: '$0.00', icon: 'u', color: '#333333' },
@@ -616,7 +617,6 @@
             });
 
             // --- 2. Modal/Panel Handlers (MODIFIED) ---
-            // closePanel is now defined globally above
             
             const showPanel = (contentTemplateId) => {
                 const template = document.getElementById(contentTemplateId);
@@ -643,12 +643,11 @@
                         </a>
                     `).join('');
                     
-                    // ADDED: Listener for the new Bank Card option
+                    // Listener for the new Bank Card option
                     actionPanel.querySelector('[data-action-target="bank-card"]').addEventListener('click', () => {
                         showPanel('bank-card-input-template');
                         initBankCardInput();
                     });
-                    // END ADDED
                     
                 } else if (contentTemplateId === 'receive-panel-template') {
                     const receiveList = actionPanel.querySelector('#receive-network-list');
@@ -659,13 +658,12 @@
                             <i class="fa-solid fa-chevron-right" style="color: var(--secondary-text);"></i>
                         </a>
                     `).join('');
-                } else if (contentTemplateId === 'bank-card-amount-template') { // ADDED
+                } else if (contentTemplateId === 'bank-card-amount-template') { 
                     initBankCardAmount();
-                } else if (contentTemplateId === 'bank-card-processing-template') { // ADDED
+                } else if (contentTemplateId === 'bank-card-processing-template') { 
                     startProcessingSpinner();
-                } else if (contentTemplateId === 'bank-card-success-template') { // ADDED
+                } else if (contentTemplateId === 'bank-card-success-template') { 
                     document.getElementById('success-crypto').textContent = `${currentSendAmount.toFixed(2)} USDT`;
-                    document.getElementById('success-fiat').textContent = `£${currentReceiveAmountGBP.toFixed(2)}`;
                     document.getElementById('success-done-btn').addEventListener('click', closePanel);
                 }
 
@@ -673,7 +671,7 @@
                 document.body.style.overflow = 'hidden';
             };
 
-            // ADDED: Card Flow Step 1: Input & Detection Logic
+            // Card Flow Step 1: Input & Detection Logic
             function initBankCardInput() {
                 const cardNumberInput = document.getElementById('card-number');
                 const linkCardBtn = document.getElementById('link-card-btn');
@@ -694,7 +692,6 @@
                     
                     cardLogoDisplay.innerHTML = logoHtml;
 
-                    // Enable button if number is 16 digits long (simulated validation)
                     const isValid = number.length === 16;
                     linkCardBtn.disabled = !isValid;
 
@@ -703,7 +700,6 @@
                     }
                 };
 
-                // Add space formatting and detection
                 cardNumberInput.addEventListener('input', (e) => {
                     let number = e.target.value.replace(/\D/g, '').substring(0, 16); 
                     number = number.replace(/(\d{4})/g, '$1 ').trim(); 
@@ -711,7 +707,6 @@
                     updateCardDetection();
                 });
 
-                // Simulate Linking Card
                 linkCardBtn.addEventListener('click', () => {
                     if (!linkCardBtn.disabled) {
                         showPanel('bank-card-amount-template');
@@ -719,7 +714,7 @@
                 });
             }
 
-            // ADDED: Card Flow Step 2: Amount & Conversion Logic
+            // Card Flow Step 2: Amount & Conversion Logic
             function initBankCardAmount() {
                 const sendAmountInput = document.getElementById('send-amount');
                 const receivedAmountGbpSpan = document.getElementById('received-amount-gbp');
@@ -752,11 +747,8 @@
                 };
 
                 sendAmountInput.addEventListener('input', updateConversion);
-                
-                // Initialize conversion with default value
                 updateConversion(); 
 
-                // Go to Checkout/Processing step
                 confirmSendBtn.addEventListener('click', () => {
                     if (!confirmSendBtn.disabled) {
                         showPanel('bank-card-processing-template');
@@ -764,7 +756,7 @@
                 });
             }
 
-            // ADDED: Card Flow Step 3: Spinner and Countdown
+            // Card Flow Step 3: Spinner and Countdown
             function startProcessingSpinner() {
                 const countdownTimerSpan = document.getElementById('countdown-timer');
                 const checkoutCryptoSpan = document.getElementById('checkout-crypto');
@@ -779,14 +771,24 @@
 
                     if (count <= 0) {
                         clearInterval(countdownInterval);
-                        // Transition to success page
+                        
+                        // Deduct from Main Balance
+                        globalWalletBalance -= currentSendAmount;
+                        document.getElementById('main-balance-display').textContent = `$${globalWalletBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        
+                        // Deduct from Asset Counts
+                        let usdtCount = 15419.2666 - currentSendAmount;
+                        let usdtFiat = 15419.33 - currentSendAmount;
+                        document.getElementById('asset-usdt-count').textContent = usdtCount.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4});
+                        document.getElementById('asset-usdt-fiat').textContent = `$${usdtFiat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        document.getElementById('total-assets-text').textContent = `$${usdtFiat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
                         showPanel('bank-card-success-template');
                     }
                 }, 1000);
             }
-            // END ADDED
 
-            // Handle action button clicks (MODIFIED for showPanel)
+            // Handle action button clicks
             actionButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const action = button.getAttribute('data-action');
@@ -796,22 +798,19 @@
                     } else if (action === 'receive') {
                         showPanel('receive-panel-template');
                     } else if (action === 'history') {
-                        // Switch to History tab
-                        document.querySelector('.tab-button[data-tab="history"]').click(); // Use click() to correctly switch views
+                        document.querySelector('.tab-button[data-tab="history"]').click(); 
                     } else if (action === 'more') {
                         showPanel('more-panel-template');
                     }
                 });
             });
 
-            // Close panel when clicking the overlay background
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
                     closePanel();
                 }
             });
 
-            // Ensure the Crypto tab is active on load
             document.querySelector('.tab-button[data-tab="crypto"]').click();
         });
     </script>
